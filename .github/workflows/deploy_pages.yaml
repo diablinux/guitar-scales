@@ -1,0 +1,62 @@
+# A descriptive name for the workflow, which will be displayed in the Actions tab of your GitHub repository.
+name: Deploy Fretboard Diagrams to GitHub Pages
+
+# --- Workflow Trigger ---
+# This workflow runs on any push event to the 'main' branch.
+on:
+  push:
+    branches: ["main"]
+  # Allows you to run this workflow manually from the Actions tab as well.
+  workflow_dispatch:
+
+# --- Permissions ---
+# Grants the necessary permissions for the workflow to interact with GitHub Pages.
+# 'pages: write' allows it to deploy to Pages.
+# 'id-token: write' is required for OIDC authentication, the secure method for a workflow to authenticate.
+permissions:
+  pages: write
+  id-token: write
+
+# --- Job Definition ---
+# Defines a single job named 'deploy'. Jobs run in parallel by default, but we only need one.
+jobs:
+  deploy:
+    # Specifies that the job will run on the latest version of an Ubuntu Linux virtual environment.
+    runs-on: ubuntu-latest
+    
+    # Specifies the environment for deployment, as configured in the repository settings.
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }} # The URL will be output by the deployment step.
+      
+    steps:
+      # Step 1: Check out the repository's code into the runner.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up the Python environment required to run the script.
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' # Specify a Python version.
+
+      # Step 3: Run the Python script to generate the comprehensive HTML file.
+      - name: Generate HTML report
+        run: python fretboard_generator.py
+
+      # Step 4: Configure GitHub Pages for the artifact upload.
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      # Step 5: Upload the generated HTML as a Pages artifact.
+      # The action packages the specified path into a gzipped tarball and uploads it.
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # The path to the file(s) that will be deployed.
+          path: 'all_notes_all_modes.html'
+
+      # Step 6: Deploy the uploaded artifact to GitHub Pages.
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

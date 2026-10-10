@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 # --- Foundational Music Theory & Fretboard Data (Unchanged) ---
 CHROMATIC_SCALE_SHARPS = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
@@ -18,8 +19,9 @@ MODE_INTERVALS = {
     "Locrian":   [1, 2, 2, 1, 2, 2, 2]
 }
 
-# --- Core Functions (Unchanged) ---
+# --- Core Functions (Unchanged Logic, Modified Output) ---
 def generate_diatonic_scale(root_note: str, mode_name: str) -> list[str] | None:
+    # Function is unchanged
     if mode_name not in MODE_INTERVALS: return None
     chromatic_source = CHROMATIC_SCALE_FLATS if root_note in FLAT_KEYS else CHROMATIC_SCALE_SHARPS
     if root_note not in chromatic_source:
@@ -34,6 +36,7 @@ def generate_diatonic_scale(root_note: str, mode_name: str) -> list[str] | None:
     return scale
 
 def generate_full_fretboard_map() -> list[list[str]]:
+    # Function is unchanged
     fretboard_map = []
     for open_note in REVERSED_TUNING:
         string_notes = []
@@ -44,57 +47,92 @@ def generate_full_fretboard_map() -> list[list[str]]:
         fretboard_map.append(string_notes)
     return fretboard_map
 
-def display_fretboard_for_scale(scale_name: str, root_note: str, scale_notes: list[str], full_fretboard: list[list[str]]):
-    print(f"### Scale: {scale_name} (`{' - '.join(scale_notes)}`)")
-    print("<table><thead><tr>")
-    print('<th style="background-color: #f0f0f0; text-align: center;">String</th>')
-    for i in range(FRET_COUNT + 1): print(f'<th style="text-align: center;">{i}</th>')
-    print("</tr></thead><tbody>")
+def display_fretboard_for_scale(scale_name: str, root_note: str, scale_notes: list[str], full_fretboard: list[list[str]], file_handle):
+    """Writes the HTML table for a single scale to the provided file handle."""
+    print(f"<h3>Scale: {scale_name} (<code>{' - '.join(scale_notes)}</code>)</h3>", file=file_handle)
+    print("<table><thead><tr>", file=file_handle)
+    print('<th style="background-color: #f0f0f0; text-align: center;">String</th>', file=file_handle)
+    for i in range(FRET_COUNT + 1): print(f'<th style="text-align: center;">{i}</th>', file=file_handle)
+    print("</tr></thead><tbody>", file=file_handle)
     scale_notes_set = set(scale_notes)
     for i, string_notes in enumerate(full_fretboard):
         string_name = REVERSED_TUNING[i]
-        print("<tr>")
-        print(f'<td style="background-color: #f0f0f0; text-align: center;"><strong>{string_name}</strong></td>')
+        print("<tr>", file=file_handle)
+        print(f'<td style="background-color: #f0f0f0; text-align: center;"><strong>{string_name}</strong></td>', file=file_handle)
         for note in string_notes:
             cell_content = "--"
             if note in scale_notes_set or ENHARMONIC_MAP.get(note) in scale_notes_set:
                 is_root = (note == root_note) or (ENHARMONIC_MAP.get(note) == root_note)
                 cell_content = f"<strong>{note}</strong>" if is_root else note
-            print(f'<td style="text-align: center;">{cell_content}</td>')
-        print("</tr>")
-    print("</tbody></table>\n\n---\n")
+            print(f'<td style="text-align: center;">{cell_content}</td>', file=file_handle)
+        print("</tr>", file=file_handle)
+    print("</tbody></table>\n<hr>\n", file=file_handle)
 
-# --- MODIFICATION: Main Execution Block with argparse ---
+def write_html_header(title: str, file_handle):
+    """Writes the complete HTML document header."""
+    header = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
+    <style>
+        body {{ font-family: sans-serif; margin: 2em; }}
+        table {{ border-collapse: collapse; margin-bottom: 2em; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }}
+        th, td {{ border: 1px solid #ccc; padding: 0.5em; }}
+        code {{ background-color: #eee; padding: 0.2em 0.4em; border-radius: 3px; }}
+        h1, h3 {{ color: #333; }}
+        hr {{ border: 0; border-top: 1px solid #ddd; }}
+    </style>
+</head>
+<body>
+    <h1>{title}</h1>"""
+    print(header, file=file_handle)
+
+def write_html_footer(file_handle):
+    """Writes the HTML document footer."""
+    print("</body>\n</html>", file=file_handle)
+
+# --- Main Execution Block with File Output Logic ---
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Generate musical scale diagrams for a guitar fretboard.",
-        formatter_class=argparse.RawTextHelpFormatter # Improves help text formatting
-    )
-    parser.add_argument(
-        '-r', '--root',
-        nargs='+',  # Accept one or more values
-        required=True,
-        choices=ALL_CHROMATIC_NOTES,
-        metavar='ROOT_NOTE',
-        help="Specify one or more root notes. Example: C G# Bb"
-    )
-    parser.add_argument(
-        '-m', '--mode',
-        nargs='+',
-        required=True,
-        choices=MODE_INTERVALS.keys(),
-        metavar='MODE_NAME',
-        help=f"Specify one or more modes from the following:\n" + "\n".join(MODE_INTERVALS.keys())
-    )
+    parser = argparse.ArgumentParser(description="Generate musical scale diagrams for a guitar fretboard.")
+    parser.add_argument('-r', '--root', nargs='+', choices=ALL_CHROMATIC_NOTES, metavar='ROOT', help="One or more root notes.")
+    parser.add_argument('-m', '--mode', nargs='+', choices=MODE_INTERVALS.keys(), metavar='MODE', help="One or more modes.")
+    parser.add_argument('-o', '--outfile', metavar='FILE', help="Specify a name for the output HTML file.")
     
     args = parser.parse_args()
+
+    # Determine which roots and modes to process
+    if args.root and args.mode:
+        roots_to_process = args.root
+        modes_to_process = args.mode
+        title = f"Fretboard Diagrams for {', '.join(roots_to_process)} {', '.join(modes_to_process)}"
+        default_filename = f"{'-'.join(roots_to_process)}_{'-'.join(modes_to_process)}.html"
+    else:
+        # If specific roots/modes are not provided, process all of them
+        roots_to_process = CHROMATIC_SCALE_SHARPS
+        modes_to_process = MODE_INTERVALS.keys()
+        title = "Fretboard Diagrams for All Notes and Modes"
+        default_filename = "all_notes_all_modes.html"
+
+    output_filename = args.outfile if args.outfile else default_filename
     
     master_fretboard = generate_full_fretboard_map()
-    
-    print(f"Generating diagrams for Root(s): {', '.join(args.root)} and Mode(s): {', '.join(args.mode)}\n")
 
-    for mode_name in args.mode:
-        for root_note in args.root:
-            scale = generate_diatonic_scale(root_note, mode_name)
-            if scale:
-                display_fretboard_for_scale(f"{root_note} {mode_name}", root_note, scale, master_fretboard)
+    try:
+        with open(output_filename, 'w') as f:
+            write_html_header(title, f)
+            print(f"Generating diagrams. Output will be saved to '{output_filename}'...")
+
+            for mode_name in modes_to_process:
+                for root_note in roots_to_process:
+                    scale = generate_diatonic_scale(root_note, mode_name)
+                    if scale:
+                        display_fretboard_for_scale(f"{root_note} {mode_name}", root_note, scale, master_fretboard, f)
+            
+            write_html_footer(f)
+        
+        print(f"Successfully generated '{output_filename}'.")
+
+    except IOError as e:
+        print(f"Error: Could not write to file '{output_filename}'. Reason: {e}", file=sys.stderr)
