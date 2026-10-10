@@ -42,7 +42,7 @@ jobs:
 
       # Step 3: Run the Python script to generate the comprehensive HTML file.
       - name: Generate HTML report
-        run: python fretboard_generator.py
+        run: python guitar_scales.py
 
       # Step 4: Configure GitHub Pages for the artifact upload.
       - name: Setup Pages
