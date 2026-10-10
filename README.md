@@ -1,7 +1,7 @@
 # Guitar Scale Fretboard Generator
 
-[![Build and Deploy Pages](https://github.com/diablinux/guitar_scales/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/diablinux/guitar_scales/actions/workflows/deploy-pages.yml)
-[![GitHub Pages](https://img.shields.io/github/deployments/diablinux/guitar_scales/github-pages?label=docs&logo=github)](https://diablinux.github.io/guitar_scales/all_notes_all_modes.html)
+[![Build and Deploy Pages](https://github.com/diablinux/guitar-scales/actions/workflows/deploy_pages.yml/badge.svg)](https://github.com/diablinux/guitar-scales/actions/workflows/deploy_pages.yml)
+[![GitHub Pages](https://img.shields.io/github/deployments/diablinux/guitar-scales/github-pages?label=docs&logo=github)](https://diablinux.github.io/guitar-scales/all_notes_all_modes.html)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3110/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
@@ -9,7 +9,7 @@
 A command-line tool written in Python to generate and display musical scale diagrams on a guitar fretboard. The output is a portable, self-contained HTML file, ideal for study and reference.
 
 The primary documentation, which includes diagrams for all notes in all modes, is automatically generated and deployed via GitHub Actions. You can view the live version here:
-**[View Live Fretboard Diagrams](https://diablinux.github.io/guitar_scales/all_notes_all_modes.html)**
+**[View Live Fretboard Diagrams](https://diablinux.github.io/guitar-scales/all_notes_all_modes.html)**
 
 ---
 
@@ -50,8 +50,8 @@ No external packages are required. The script uses only the Python standard libr
 2. **Clone the repository:**
 
     ```bash
-    git clone https://github.com/diablinux/guitar_scales.git
-    cd guitar_scales
+    git clone https://github.com/diablinux/guitar-scales.git
+    cd guitar-scales
     ```
 
 ## Usage
