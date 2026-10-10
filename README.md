@@ -1,6 +1,6 @@
 # Guitar Scale Fretboard Generator
 
-[![Build and Deploy Pages](https://github.com/diablinux/guitar-scales/actions/workflows/deploy_pages.yml/badge.svg)](https://github.com/diablinux/guitar-scales/actions/workflows/deploy_pages.yml)
+[![Deploy Fretboard Diagrams to GitHub Pages](https://github.com/diablinux/guitar-scales/actions/workflows/deploy_pages.yaml/badge.svg)](https://github.com/diablinux/guitar-scales/actions/workflows/deploy_pages.yaml)
 [![GitHub Pages](https://img.shields.io/github/deployments/diablinux/guitar-scales/github-pages?label=docs&logo=github)](https://diablinux.github.io/guitar-scales/all_notes_all_modes.html)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3110/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
